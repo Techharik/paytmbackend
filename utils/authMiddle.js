@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { JWT_TOKEN } from '../config';
+import { JWT_TOKEN } from '../config.js';
 
 const authMiddleware = (req, res, next) => {
     const token = req.headers.authorization;
@@ -10,6 +10,7 @@ const authMiddleware = (req, res, next) => {
             message: 'Invalid token or token not found'
         })
     }
+
     try {
 
         let extractedToken = token.replace('Bearer ', '');
@@ -24,4 +25,8 @@ const authMiddleware = (req, res, next) => {
             message: 'Unknown Error happened loggin Again'
         })
     }
+}
+
+export {
+    authMiddleware
 }
