@@ -50,11 +50,13 @@ const searchFilter = async (req, res) => {
             $or: [
                 {
                     firstname: {
-                        "$regex": search
+                        "$regex": search,
+                        "$options": 'i'
                     }
                 }, {
                     lastname: {
-                        '$regex': search
+                        '$regex': search,
+                        "$options": 'i'
                     }
                 }
             ]
@@ -73,5 +75,6 @@ const searchFilter = async (req, res) => {
 
 
 export {
-    updateUserInfo
+    updateUserInfo,
+    searchFilter
 }
