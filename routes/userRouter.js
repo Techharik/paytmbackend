@@ -10,5 +10,5 @@ import { authMiddleware } from '../utils/authMiddle.js';
 router.post('/registeruser', signUp)
 router.post('/loginuser', signIn)
 router.put('/updateUser', authMiddleware, updateUserInfo)
-
+router.get('/searchbulk')
 export default router;

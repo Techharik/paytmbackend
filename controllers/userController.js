@@ -41,6 +41,36 @@ const updateUserInfo = async (req, res) => {
 
 }
 
+const searchFilter = async (req, res) => {
+    const search = req.query.filter || ''
+
+    try {
+
+        const users = await userModal.find({
+            $or: [
+                {
+                    firstname: {
+                        "$regex": search
+                    }
+                }, {
+                    lastname: {
+                        '$regex': search
+                    }
+                }
+            ]
+        });
+
+        res.json({
+            success: true,
+            message: users
+        })
+    } catch (e) {
+        res.status(404).json({
+            message: "Unknown error happen"
+        })
+    }
+}
+
 
 export {
     updateUserInfo
