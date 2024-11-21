@@ -89,7 +89,7 @@ const bankBalance = async (req, res) => {
     try {
         const BanckBalance = await Account.findOne({ userId: req.userId });
 
-        res.status(400).json({
+        res.status(200).json({
             success: true,
             amount: BanckBalance.balance
         })
