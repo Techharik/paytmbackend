@@ -7,7 +7,10 @@ const bankSchema = Schema({
         ref: 'user',
         required: true
     },
-    balance: Number
+    balance: {
+        type: Number,
+        required: true
+    }
 })
 
 export const Account = model('Account', bankSchema)

@@ -1,13 +1,28 @@
 import { Schema, model } from "mongoose";
 
 const userSchema = Schema({
-    username: String,
+    username: {
+        type: String,
+        required: true,
+        trim: true,
+        maxlength: 50
+    },
     password: {
         type: String,
         select: false
     },
-    firstname: String,
-    lastname: String,
+    firstname: {
+        type: String,
+        required: true,
+        trim: true,
+        maxlength: 50
+    },
+    lastname: {
+        type: String,
+        required: true,
+        trim: true,
+        maxlength: 50
+    },
 })
 
 export const userModal = model("user", userSchema)
