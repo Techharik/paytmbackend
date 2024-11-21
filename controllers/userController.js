@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import { userModal } from '../modals/usermodal.js';
+import { Account } from '../modals/bankSchema.js';
+import mongoose from 'mongoose';
+
 
 
 const updateBody = z.object({
@@ -21,9 +24,9 @@ const updateUserInfo = async (req, res) => {
     }
 
     try {
-        const updateUser = await userModal.updateOne({
+        const updateUser = await userModal.updateOne({ _id: req.userId }, {
             ...body
-        }, { id: req.userId })
+        }, { runValidators: true })
 
         res.status(200).json({
             success: true,
@@ -61,10 +64,11 @@ const searchFilter = async (req, res) => {
                 }
             ]
         });
-
+        const totalSearch = users.length
         res.json({
             success: true,
-            message: users
+            message: users,
+            TotalUser: totalSearch
         })
     } catch (e) {
         res.status(404).json({
@@ -73,8 +77,78 @@ const searchFilter = async (req, res) => {
     }
 }
 
+const bankBalance = async (req, res) => {
+    const user = await userModal.findOne({ _id: req.userId })
+
+    if (!user) {
+        return res.status(400).json({
+            success: false,
+            message: 'User Not found'
+        })
+    }
+    try {
+        const BanckBalance = await Account.findOne({ userId: req.userId });
+
+        res.status(400).json({
+            success: true,
+            amount: BanckBalance.balance
+        })
+    } catch (e) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid error' + e
+        })
+    }
+
+
+}
+
+const transferAmount = async (req, res) => {
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    //get the reciver id
+    const { recerverId, amount } = req.body;
+
+    //check the sender amount within the limit.
+    const sender = await Account.findOne({ userId: req.userId }).session(session)
+
+    const senderLimit = sender.balance < amount;
+
+    if (senderLimit) {
+        await session.abortTransaction();
+        return res.status(401).json({
+            success: false,
+            message: 'amount exceeds the min Balance'
+        })
+    }
+
+    const Receiver = await userModal.findOne({ _id: recerverId }).session(session)
+
+    if (!Receiver) {
+        await session.abortTransaction()
+        return res.status(401).json({
+            success: false,
+            message: 'Receiver id invalid not found'
+        })
+    }
+
+    const deductAmmount = await Account.updateOne({ userId: req.userId }, { $inc: { balance: - amount } }).session(session)
+
+    const receiverIncAmount = await Account.updateOne(
+        { userId: recerverId },
+        { $inc: { balance: amount } }
+    ).session(session)
+    await session.commitTransaction();
+    res.status(200).json({
+        message: 'Fund Transfered Successfully'
+    })
+}
 
 export {
     updateUserInfo,
-    searchFilter
+    searchFilter,
+    bankBalance,
+    transferAmount
 }

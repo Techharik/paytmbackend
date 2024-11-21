@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { userModal } from '../modals/usermodal.js';
 import jwt from 'jsonwebtoken'
 import { JWT_TOKEN } from '../config.js';
+import { Account } from '../modals/bankSchema.js';
 
 
 const registerSchema = z.object({
@@ -30,18 +31,28 @@ const signUp = async (req, res) => {
     const userExists = await userModal.findOne({
         username: body.username
     })
-    console.log(userExists)
+
+
     if (userExists) {
         return res.status(401).json({
             success: false,
             message: 'User already exists and login'
         })
     }
-    try {
 
+    try {
         const newUser = await userModal.create({
-            ...body
+            ...body,
+
         })
+        const initalAccountBalance = Math.floor(Math.random() * 10000);
+        console.log(initalAccountBalance);
+
+        const balance = await Account.create({
+            userId: newUser._id,
+            balance: initalAccountBalance
+        })
+
 
         const token = jwt.sign({
             userId: newUser.id,
@@ -75,7 +86,14 @@ const signIn = async (req, res) => {
 
     const userExists = await userModal.findOne({
         username: body.username
-    })
+    }).select('+password')
+
+    if (!userExists) {
+        return res.status(401).json({
+            success: false,
+            message: 'User Not found'
+        })
+    }
 
     const verifyPassword = userExists.password === body.password
 

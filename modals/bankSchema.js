@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 
 
 const bankSchema = Schema({
@@ -12,5 +12,6 @@ const bankSchema = Schema({
         required: true
     }
 })
+
 
 export const Account = model('Account', bankSchema)
